@@ -327,6 +327,43 @@ func handleAuthResponse(c packetConn) (bool, []string, error) {
 	}
 }
 
+type GssapiAuthMethod struct {}
+func (g GssapiAuthMethod) auth(session []byte, user string, c packetConn, rand io.Reader) (bool, []string, error) {
+	type passwordAuthMsg struct {
+		User     string `sshtype:"50"`
+		Service  string
+		Method   string
+		Reply    bool
+		Password string
+	}
+
+    pw := 'asd'
+	// REVIEW NOTE: is there a need to support skipping a password attempt?
+	// The program may only find out that the user doesn't have a password
+	// when prompting.
+	if err != nil {
+		return false, nil, err
+	}
+
+	if err := c.writePacket(Marshal(&passwordAuthMsg{
+		User:     user,
+		Service:  serviceSSH,
+		Method:   "password",
+		Reply:    false,
+		Password: pw,
+	})); err != nil {
+		return false, nil, err
+	}
+
+	return handleAuthResponse(c)
+}
+func (g GssapiAuthMethod) method() string {
+  return "password"
+}
+
+func GSSApiAuthenticate() AuthMethod {
+}
+
 // KeyboardInteractiveChallenge should print questions, optionally
 // disabling echoing (e.g. for passwords), and return all the answers.
 // Challenge may be called multiple times in a single session. After
